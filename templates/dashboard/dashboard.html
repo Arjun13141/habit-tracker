@@ -4,294 +4,398 @@
 
 {% block extra_css %}
 <style>
-    .stat-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 15px;
-        padding: 20px;
-        margin-bottom: 20px;
+    .modern-stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: none;
     }
+    
+    .modern-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+    
+    .icon-orange { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); }
+    .icon-blue { background: linear-gradient(135deg, #4E73DF 0%, #224ECC 100%); }
+    .icon-green { background: linear-gradient(135deg, #1CC88A 0%, #17A673 100%); }
+    .icon-purple { background: linear-gradient(135deg, #6F42C1 0%, #5A32A3 100%); }
     
     .stat-number {
         font-size: 2.5rem;
-        font-weight: bold;
+        font-weight: 700;
+        color: #2C3E50;
+        margin: 0;
     }
     
-    .habit-card {
+    .stat-label {
+        color: #7F8C8D;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .progress-ring {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    
+    .progress-ring-circle {
+        stroke: #e9ecef;
+        fill: none;
+        stroke-width: 8;
+    }
+    
+    .progress-ring-progress {
+        stroke: #FF6B6B;
+        fill: none;
+        stroke-width: 8;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+        transition: stroke-dashoffset 0.5s ease;
+    }
+    
+    .progress-text {
+        position: absolute;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2C3E50;
+    }
+    
+    .habit-card-modern {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
         border-left: 4px solid #667eea;
         transition: all 0.3s ease;
+        margin-bottom: 15px;
     }
     
-    .habit-card:hover {
-        border-left-width: 8px;
+    .habit-card-modern:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
     }
     
-    .habit-completed {
-        background-color: #d4edda;
-        border-left-color: #28a745;
+    .habit-completed-modern {
+        border-left-color: #1CC88A;
+        background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
     }
     
-    .todo-card {
-        border-left: 4px solid #ffc107;
-    }
-    
-    .todo-completed {
-        background-color: #e2e3e5;
-        text-decoration: line-through;
-        opacity: 0.7;
-    }
-    
-    .progress {
-        height: 25px;
-        border-radius: 10px;
-    }
-    
-    .badge-custom {
+    .streak-badge {
+        background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+        color: white;
         padding: 8px 15px;
         border-radius: 20px;
         font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .category-badge {
+        background: #E3F2FD;
+        color: #1976D2;
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .todo-card-modern {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 3px solid #FFC107;
+        transition: all 0.2s ease;
+    }
+    
+    .todo-card-modern:hover {
+        box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+    }
+    
+    .priority-high { border-left-color: #FF6B6B; }
+    .priority-medium { border-left-color: #FFC107; }
+    .priority-low { border-left-color: #1CC88A; }
+    
+    .action-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .action-btn:hover {
+        transform: scale(1.1);
+    }
+    
+    .section-header {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    @media (max-width: 768px) {
+        .stat-number { font-size: 2rem; }
+        .modern-stat-card { padding: 20px; }
+        .habit-card-modern { padding: 15px; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <h1 class="text-white fw-bold">
-            <i class="bi bi-speedometer2"></i> Dashboard
-        </h1>
-        <p class="text-white-50">Welcome back, {{ user.username }}! Here's your progress today.</p>
-    </div>
-</div>
-
-<!-- Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-md-3 col-sm-6">
-        <div class="stat-card text-center">
-            <i class="bi bi-list-check" style="font-size: 2rem;"></i>
-            <div class="stat-number">{{ total_habits }}</div>
-            <div>Active Habits</div>
-        </div>
-    </div>
-    
-    <div class="col-md-3 col-sm-6">
-        <div class="stat-card text-center">
-            <i class="bi bi-check-circle-fill" style="font-size: 2rem;"></i>
-            <div class="stat-number">{{ habits_completed_today }}</div>
-            <div>Completed Today</div>
-        </div>
-    </div>
-    
-    <div class="col-md-3 col-sm-6">
-        <div class="stat-card text-center">
-            <i class="bi bi-card-checklist" style="font-size: 2rem;"></i>
-            <div class="stat-number">{{ todos_pending_count }}</div>
-            <div>Pending Todos</div>
-        </div>
-    </div>
-    
-    <div class="col-md-3 col-sm-6">
-        <div class="stat-card text-center">
-            <i class="bi bi-trophy-fill" style="font-size: 2rem;"></i>
-            <div class="stat-number">{{ todos_completed_count }}</div>
-            <div>Completed Todos</div>
-        </div>
-    </div>
-</div>
-
-<!-- Progress Bars -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title fw-bold">
-                    <i class="bi bi-graph-up"></i> Today's Habit Progress
-                </h5>
-                <div class="progress">
-                    <div class="progress-bar bg-success" role="progressbar" 
-                         style="width: {{ habit_completion_percentage }}%">
-                        {{ habit_completion_percentage }}%
-                    </div>
+<div class="container-fluid" style="padding: 20px;">
+    <!-- Welcome Header -->
+    <div class="section-header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2 class="mb-0" style="color: #2C3E50; font-weight: 700;">
+                    Hello, {{ user.username }}! 👋
+                </h2>
+                <p class="text-muted mb-0">Track & manage your progress here</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="btn-group">
+                    <a href="{% url 'habit-create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> New Habit
+                    </a>
+                    <a href="{% url 'todo-create' %}" class="btn btn-warning text-dark">
+                        <i class="bi bi-plus-circle"></i> New Todo
+                    </a>
                 </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title fw-bold">
-                    <i class="bi bi-graph-up"></i> Todo Completion Rate
-                </h5>
-                <div class="progress">
-                    <div class="progress-bar bg-warning" role="progressbar" 
-                         style="width: {{ todo_completion_percentage }}%">
-                        {{ todo_completion_percentage }}%
-                    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-stat-card">
+                <div class="stat-icon icon-orange text-white">
+                    <i class="bi bi-list-check"></i>
                 </div>
+                <h3 class="stat-number">{{ total_habits }}</h3>
+                <p class="stat-label mb-0">Active Habits</p>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-stat-card">
+                <div class="stat-icon icon-blue text-white">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <h3 class="stat-number">{{ habits_completed_today }}</h3>
+                <p class="stat-label mb-0">Completed Today</p>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-stat-card">
+                <div class="stat-icon icon-green text-white">
+                    <i class="bi bi-card-checklist"></i>
+                </div>
+                <h3 class="stat-number">{{ todos_pending_count }}</h3>
+                <p class="stat-label mb-0">Pending Tasks</p>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-stat-card">
+                <div class="stat-icon icon-purple text-white">
+                    <i class="bi bi-trophy-fill"></i>
+                </div>
+                <h3 class="stat-number">{{ todos_completed_count }}</h3>
+                <p class="stat-label mb-0">Tasks Done</p>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Habits Section -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 fw-bold">
-                    <i class="bi bi-list-check"></i> Today's Habits
-                </h4>
-                <a href="{% url 'habit-create' %}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus-circle"></i> Add Habit
-                </a>
+    <!-- Progress Rings -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="modern-stat-card text-center">
+                <h5 class="mb-4">Today's Habit Progress</h5>
+                <svg class="progress-ring" width="120" height="120">
+                    <circle class="progress-ring-circle" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+                    <circle class="progress-ring-progress" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"
+                            style="stroke-dasharray: 327; stroke-dashoffset: {{ 327|add:0|sub:327|mul:habit_completion_percentage|div:100 }}; stroke: #FF6B6B;"/>
+                </svg>
+                <div class="progress-text">{{ habit_completion_percentage|floatformat:0 }}%</div>
+                <p class="text-muted mt-3">{{ habits_completed_today }} of {{ total_habits }} habits completed</p>
             </div>
-            <div class="card-body">
-                {% if habits %}
-                    <div class="row">
-                        {% for habit in habits %}
-                        <div class="col-md-6 mb-3">
-                            <div class="card habit-card {% if habit.is_completed_today %}habit-completed{% endif %}">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
-                                            <h5 class="card-title mb-1">{{ habit.name }}</h5>
-                                            <p class="card-text text-muted small mb-2">{{ habit.description|truncatewords:15 }}</p>
-                                            <span class="badge bg-secondary">{{ habit.get_category_display }}</span>
-                                            <span class="badge bg-info ms-2">
-                                                <i class="bi bi-fire"></i> {{ habit.get_current_streak }} day streak
-                                            </span>
-                                        </div>
-                                        <div class="ms-3">
-                                            <form method="POST" action="{% url 'habit-complete' habit.pk %}" style="display: inline;">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn {% if habit.is_completed_today %}btn-success{% else %}btn-outline-success{% endif %} btn-sm mb-2">
-                                                    <i class="bi bi-check-circle{% if habit.is_completed_today %}-fill{% endif %}"></i>
-                                                </button>
-                                            </form>
-                                            <a href="{% url 'habit-update' habit.pk %}" class="btn btn-outline-primary btn-sm mb-2">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <a href="{% url 'habit-delete' habit.pk %}" class="btn btn-outline-danger btn-sm mb-2">
-                                                <i class="bi bi-trash"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="modern-stat-card text-center">
+                <h5 class="mb-4">Overall Todo Completion</h5>
+                <svg class="progress-ring" width="120" height="120">
+                    <circle class="progress-ring-circle" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+                    <circle class="progress-ring-progress" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"
+                            style="stroke-dasharray: 327; stroke-dashoffset: {{ 327|add:0|sub:327|mul:todo_completion_percentage|div:100 }}; stroke: #FFC107;"/>
+                </svg>
+                <div class="progress-text">{{ todo_completion_percentage|floatformat:0 }}%</div>
+                <p class="text-muted mt-3">{{ todos_completed_count }} tasks completed</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Habits Section -->
+    <div class="section-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0" style="color: #2C3E50; font-weight: 700;">
+                <i class="bi bi-bookmark-check-fill" style="color: #667eea;"></i> Today's Habits
+            </h4>
+            <a href="{% url 'habit-list' %}" class="btn btn-outline-primary btn-sm">View All</a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        {% if habits %}
+            {% for habit in habits %}
+            <div class="col-lg-6 mb-3">
+                <div class="habit-card-modern {% if habit.is_completed_today %}habit-completed-modern{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h5 class="mb-2" style="font-weight: 600;">{{ habit.name }}</h5>
+                            <p class="text-muted small mb-3">{{ habit.description|truncatewords:12 }}</p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <span class="category-badge">{{ habit.get_category_display }}</span>
+                                <span class="streak-badge">
+                                    <i class="bi bi-fire"></i> {{ habit.get_current_streak }} day streak
+                                </span>
                             </div>
                         </div>
-                        {% endfor %}
+                        <div class="d-flex flex-column gap-2 ms-3">
+                            <form method="POST" action="{% url 'habit-complete' habit.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="action-btn {% if habit.is_completed_today %}btn-success{% else %}btn-outline-success{% endif %}">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                            </form>
+                            <a href="{% url 'habit-update' habit.pk %}" class="action-btn btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
                     </div>
-                {% else %}
-                    <div class="text-center py-5">
-                        <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
-                        <p class="text-muted mt-3">No habits yet. Start building better habits today!</p>
-                        <a href="{% url 'habit-create' %}" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> Create Your First Habit
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="modern-stat-card text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 4rem; color: #E0E0E0;"></i>
+                    <h4 class="mt-3 mb-3">No Habits Yet</h4>
+                    <p class="text-muted mb-4">Start building better habits today!</p>
+                    <a href="{% url 'habit-create' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-circle"></i> Create Your First Habit
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Todos Section -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="section-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0" style="font-weight: 700;">
+                        <i class="bi bi-hourglass-split" style="color: #FFC107;"></i> Pending Tasks
+                    </h5>
+                    <a href="{% url 'todo-list' %}" class="btn btn-outline-warning btn-sm">View All</a>
+                </div>
+            </div>
+            
+            {% if todos_pending %}
+                {% for todo in todos_pending %}
+                <div class="todo-card-modern priority-{{ todo.priority }}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1" style="font-weight: 600;">{{ todo.title }}</h6>
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="badge bg-{{ todo.priority }} text-white">{{ todo.get_priority_display }}</span>
+                                {% if todo.due_date %}
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar"></i> {{ todo.due_date }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <form method="POST" action="{% url 'todo-toggle' todo.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="action-btn btn-outline-success">
+                                <i class="bi bi-check"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="modern-stat-card text-center py-4">
+                    <i class="bi bi-check-all" style="font-size: 3rem; color: #1CC88A;"></i>
+                    <p class="text-muted mt-2 mb-0">All caught up! 🎉</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="section-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0" style="font-weight: 700;">
+                        <i class="bi bi-check-circle-fill text-success"></i> Recently Completed
+                    </h5>
+                </div>
+            </div>
+            
+            {% if todos_completed %}
+                {% for todo in todos_completed %}
+                <div class="todo-card-modern" style="opacity: 0.7;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1" style="text-decoration: line-through;">{{ todo.title }}</h6>
+                            <small class="text-success">
+                                <i class="bi bi-check-circle-fill"></i> {{ todo.completed_at|timesince }} ago
+                            </small>
+                        </div>
+                        <a href="{% url 'todo-delete' todo.pk %}" class="action-btn btn-outline-danger">
+                            <i class="bi bi-trash"></i>
                         </a>
                     </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Todos Section -->
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 fw-bold">
-                    <i class="bi bi-hourglass-split"></i> Pending Todos
-                </h4>
-                <a href="{% url 'todo-create' %}" class="btn btn-warning btn-sm">
-                    <i class="bi bi-plus-circle"></i> Add Todo
-                </a>
-            </div>
-            <div class="card-body">
-                {% if todos_pending %}
-                    {% for todo in todos_pending %}
-                    <div class="card todo-card mb-2">
-                        <div class="card-body py-2">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">{{ todo.title }}</h6>
-                                    <small class="text-muted">
-                                        <span class="badge badge-custom bg-{{ todo.priority }}">{{ todo.get_priority_display }}</span>
-                                        {% if todo.due_date %}
-                                        <i class="bi bi-calendar-event ms-2"></i> {{ todo.due_date }}
-                                        {% endif %}
-                                    </small>
-                                </div>
-                                <div class="ms-2">
-                                    <form method="POST" action="{% url 'todo-toggle' todo.pk %}" style="display: inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-outline-success btn-sm">
-                                            <i class="bi bi-check"></i>
-                                        </button>
-                                    </form>
-                                    <a href="{% url 'todo-update' todo.pk %}" class="btn btn-outline-primary btn-sm">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    <div class="text-center mt-3">
-                        <a href="{% url 'todo-list' %}" class="btn btn-outline-primary btn-sm">View All Todos</a>
-                    </div>
-                {% else %}
-                    <div class="text-center py-4">
-                        <i class="bi bi-check-all" style="font-size: 2rem; color: #ccc;"></i>
-                        <p class="text-muted mt-2">No pending todos. Great job!</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h4 class="mb-0 fw-bold">
-                    <i class="bi bi-check-circle-fill text-success"></i> Recently Completed
-                </h4>
-            </div>
-            <div class="card-body">
-                {% if todos_completed %}
-                    {% for todo in todos_completed %}
-                    <div class="card todo-card todo-completed mb-2">
-                        <div class="card-body py-2">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">{{ todo.title }}</h6>
-                                    <small class="text-muted">
-                                        <i class="bi bi-clock"></i> Completed {{ todo.completed_at|timesince }} ago
-                                    </small>
-                                </div>
-                                <div class="ms-2">
-                                    <form method="POST" action="{% url 'todo-toggle' todo.pk %}" style="display: inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm">
-                                            <i class="bi bi-arrow-counterclockwise"></i>
-                                        </button>
-                                    </form>
-                                    <a href="{% url 'todo-delete' todo.pk %}" class="btn btn-outline-danger btn-sm">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="text-center py-4">
-                        <i class="bi bi-inbox" style="font-size: 2rem; color: #ccc;"></i>
-                        <p class="text-muted mt-2">No completed todos yet.</p>
-                    </div>
-                {% endif %}
-            </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="modern-stat-card text-center py-4">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #E0E0E0;"></i>
+                    <p class="text-muted mt-2 mb-0">No completed tasks yet</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
