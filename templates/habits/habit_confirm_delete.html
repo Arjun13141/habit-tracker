@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Habit - Habit Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-lg border-danger">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Delete Habit
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <strong>Warning!</strong> This action cannot be undone.
+                </div>
+                
+                <h4 class="mb-3">Are you sure you want to delete this habit?</h4>
+                
+                <div class="card mb-4 bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ habit.name }}</h5>
+                        <p class="card-text text-muted">{{ habit.description|default:"No description" }}</p>
+                        <div>
+                            <span class="badge bg-secondary">{{ habit.get_category_display }}</span>
+                            <span class="badge bg-warning text-dark ms-2">
+                                {{ habit.get_current_streak }} day streak
+                            </span>
+                            <span class="badge bg-info ms-2">
+                                {{ habit.get_total_completions }} total completions
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            <i class="bi bi-trash"></i> Yes, Delete This Habit
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> No, Keep It
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Habit Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">
+                    <i class="bi bi-plus-circle"></i> {{ title }}
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-bookmark"></i> Habit Name *
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger small mt-1">{{ form.name.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Give your habit a clear, specific name</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-text-paragraph"></i> Description
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Optional: Add details about why this habit matters to you</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-tags"></i> Category *
+                        </label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="text-danger small mt-1">{{ form.category.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Organize your habits by category</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> Save Habit
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Tips Card -->
+        <div class="card mt-4 border-info">
+            <div class="card-body">
+                <h5 class="card-title text-info">
+                    <i class="bi bi-lightbulb"></i> Tips for Great Habits
+                </h5>
+                <ul class="mb-0">
+                    <li>Be specific: "Drink 8 glasses of water" vs "Drink more water"</li>
+                    <li>Start small: Build consistency before increasing difficulty</li>
+                    <li>Track daily: Small wins add up to big results</li>
+                    <li>Stay patient: It takes time to build lasting habits</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
