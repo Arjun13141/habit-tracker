@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{% block title %}Habit Tracker{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
@@ -52,6 +52,34 @@
         .alert {
             border-radius: 10px;
             border: none;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .stat-card {
+                margin-bottom: 15px;
+            }
+            
+            .card {
+                margin-bottom: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .btn-group .btn {
+                margin-bottom: 5px;
+            }
+            
+            .navbar-brand {
+                font-size: 1rem;
+            }
         }
     </style>
     

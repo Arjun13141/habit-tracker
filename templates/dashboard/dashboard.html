@@ -48,40 +48,7 @@
         letter-spacing: 0.5px;
     }
     
-    .progress-ring {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-    }
-    
-    .progress-ring-circle {
-        stroke: #e9ecef;
-        fill: none;
-        stroke-width: 8;
-    }
-    
-    .progress-ring-progress {
-        stroke: #FF6B6B;
-        fill: none;
-        stroke-width: 8;
-        stroke-linecap: round;
-        transform: rotate(-90deg);
-        transform-origin: 50% 50%;
-        transition: stroke-dashoffset 0.5s ease;
-    }
-    
-    .progress-text {
-        position: absolute;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #2C3E50;
-    }
-    
+
     .habit-card-modern {
         background: white;
         border-radius: 15px;
@@ -242,12 +209,21 @@
         <div class="col-md-6 mb-3">
             <div class="modern-stat-card text-center">
                 <h5 class="mb-4">Today's Habit Progress</h5>
-                <svg class="progress-ring" width="120" height="120">
-                    <circle class="progress-ring-circle" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
-                    <circle class="progress-ring-progress" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"
-                            style="stroke-dasharray: 327; stroke-dashoffset: {{ 327|add:0|sub:327|mul:habit_completion_percentage|div:100 }}; stroke: #FF6B6B;"/>
-                </svg>
-                <div class="progress-text">{{ habit_completion_percentage|floatformat:0 }}%</div>
+                <div class="position-relative d-inline-block">
+                    <div class="progress mx-auto" style="width: 150px; height: 150px; border-radius: 50%; background: #f0f0f0;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ habit_completion_percentage }}%; 
+                                    background: conic-gradient(#FF6B6B {{ habit_completion_percentage }}%, #f0f0f0 0);
+                                    border-radius: 50%;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;">
+                        </div>
+                    </div>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: 700;">
+                        {{ habit_completion_percentage|floatformat:0 }}%
+                    </div>
+                </div>
                 <p class="text-muted mt-3">{{ habits_completed_today }} of {{ total_habits }} habits completed</p>
             </div>
         </div>
@@ -255,12 +231,21 @@
         <div class="col-md-6 mb-3">
             <div class="modern-stat-card text-center">
                 <h5 class="mb-4">Overall Todo Completion</h5>
-                <svg class="progress-ring" width="120" height="120">
-                    <circle class="progress-ring-circle" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
-                    <circle class="progress-ring-progress" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"
-                            style="stroke-dasharray: 327; stroke-dashoffset: {{ 327|add:0|sub:327|mul:todo_completion_percentage|div:100 }}; stroke: #FFC107;"/>
-                </svg>
-                <div class="progress-text">{{ todo_completion_percentage|floatformat:0 }}%</div>
+                <div class="position-relative d-inline-block">
+                    <div class="progress mx-auto" style="width: 150px; height: 150px; border-radius: 50%; background: #f0f0f0;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ todo_completion_percentage }}%; 
+                                    background: conic-gradient(#FFC107 {{ todo_completion_percentage }}%, #f0f0f0 0);
+                                    border-radius: 50%;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;">
+                        </div>
+                    </div>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: 700;">
+                        {{ todo_completion_percentage|floatformat:0 }}%
+                    </div>
+                </div>
                 <p class="text-muted mt-3">{{ todos_completed_count }} tasks completed</p>
             </div>
         </div>
