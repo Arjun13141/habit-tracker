@@ -1,2 +1,1 @@
-release: python manage.py migrate --noinput
-web: gunicorn habit-tracker --log-file -
+web: python manage.py migrate && gunicorn config.wsgi --log-file -
