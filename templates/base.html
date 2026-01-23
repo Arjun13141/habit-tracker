@@ -273,6 +273,9 @@
             <a href="{% url 'dashboard' %}" class="nav-link-custom {% if request.path == '/' %}active{% endif %}">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
+            <a href="{% url 'analytics' %}" class="nav-link-custom {% if 'analytics' in request.path %}active{% endif %}">
+                <i class="bi bi-graph-up"></i> Analytics
+            </a>
             <a href="{% url 'habit-list' %}" class="nav-link-custom {% if 'habits' in request.path %}active{% endif %}">
                 <i class="bi bi-list-check"></i> Habits
             </a>

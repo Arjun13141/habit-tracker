@@ -1,0 +1,412 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - HabitFlow{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+{% block page_subtitle %}Insights into your habits and progress{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    
+    .stat-card-analytics {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .stat-card-analytics .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+    
+    .stat-card-analytics .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    
+    .stat-card-analytics .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    
+    .habit-rank-item {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .rank-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+    
+    .rank-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #000; }
+    .rank-2 { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: #000; }
+    .rank-3 { background: linear-gradient(135deg, #cd7f32, #e8a87c); color: #000; }
+    .rank-other { background: var(--bg-tertiary); color: var(--text-secondary); }
+    
+    .progress-bar-custom {
+        background: var(--bg-primary);
+        height: 24px;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        transition: width 0.5s ease;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .achievement-item {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 12px;
+    }
+    
+    .achievement-icon {
+        font-size: 2.5rem;
+    }
+    
+    canvas {
+        max-height: 400px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Key Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card-analytics">
+            <div class="stat-icon" style="color: var(--accent-primary);">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div class="stat-value">{{ total_completions }}</div>
+            <div class="stat-label">Total Completions</div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card-analytics">
+            <div class="stat-icon" style="color: var(--accent-warning);">
+                <i class="bi bi-fire"></i>
+            </div>
+            <div class="stat-value">{{ longest_streak }}</div>
+            <div class="stat-label">Longest Streak</div>
+            {% if longest_streak_habit %}
+            <small class="text-secondary">{{ longest_streak_habit }}</small>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card-analytics">
+            <div class="stat-icon" style="color: var(--accent-success);">
+                <i class="bi bi-trophy-fill"></i>
+            </div>
+            <div class="stat-value">{{ total_achievements }}</div>
+            <div class="stat-label">Achievements</div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card-analytics">
+            <div class="stat-icon" style="color: var(--accent-secondary);">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="stat-value">{{ weekly_completion_rate }}%</div>
+            <div class="stat-label">This Week</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+    <!-- Completion Trend Chart -->
+    <div class="col-lg-8">
+        <div class="chart-container">
+            <h5 class="mb-4">
+                <i class="bi bi-graph-up" style="color: var(--accent-primary);"></i>
+                30-Day Completion Trend
+            </h5>
+            <canvas id="completionChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Category Distribution -->
+    <div class="col-lg-4">
+        <div class="chart-container">
+            <h5 class="mb-4">
+                <i class="bi bi-pie-chart-fill" style="color: var(--accent-secondary);"></i>
+                Habits by Category
+            </h5>
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Best Performing Habits -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h5 class="mb-4">
+                <i class="bi bi-star-fill" style="color: #ffd700;"></i>
+                Top Performing Habits
+            </h5>
+            
+            {% if best_habits %}
+                {% for habit in best_habits %}
+                <div class="habit-rank-item">
+                    <div class="d-flex align-items-center gap-3 flex-grow-1">
+                        <div class="rank-number rank-{% if forloop.counter <= 3 %}{{ forloop.counter }}{% else %}other{% endif %}">
+                            {{ forloop.counter }}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ habit.name }}</h6>
+                            <small class="text-secondary">
+                                <span class="badge bg-secondary">{{ habit.category }}</span>
+                                <span class="ms-2"><i class="bi bi-fire"></i> {{ habit.streak }} day streak</span>
+                            </small>
+                        </div>
+                    </div>
+                    <div style="min-width: 80px;">
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: {{ habit.rate }}%;">
+                                {{ habit.rate }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-secondary text-center py-4">No habits tracked yet</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Category Performance -->
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h5 class="mb-4">
+                <i class="bi bi-tags-fill" style="color: var(--accent-primary);"></i>
+                Category Performance
+            </h5>
+            
+            {% if category_percentages %}
+                {% for category, percentage in category_percentages.items %}
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="fw-semibold">{{ category }}</span>
+                        <span class="text-secondary">{{ percentage }}%</span>
+                    </div>
+                    <div class="progress-bar-custom">
+                        <div class="progress-fill" style="width: {{ percentage }}%;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-secondary text-center py-4">No data available</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Todo Analytics & Achievements -->
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h5 class="mb-4">
+                <i class="bi bi-card-checklist" style="color: var(--accent-warning);"></i>
+                Task Statistics
+            </h5>
+            
+            <div class="row g-3 mb-3">
+                <div class="col-4 text-center">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-primary);">
+                        {{ total_todos }}
+                    </div>
+                    <div class="text-secondary small">Total</div>
+                </div>
+                <div class="col-4 text-center">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-success);">
+                        {{ completed_todos }}
+                    </div>
+                    <div class="text-secondary small">Done</div>
+                </div>
+                <div class="col-4 text-center">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-warning);">
+                        {{ pending_todos }}
+                    </div>
+                    <div class="text-secondary small">Pending</div>
+                </div>
+            </div>
+            
+            <h6 class="mt-4 mb-3">Priority Breakdown</h6>
+            <div class="d-flex justify-content-around">
+                <div class="text-center">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-danger);">
+                        {{ priority_breakdown.high }}
+                    </div>
+                    <small class="text-secondary">High</small>
+                </div>
+                <div class="text-center">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-warning);">
+                        {{ priority_breakdown.medium }}
+                    </div>
+                    <small class="text-secondary">Medium</small>
+                </div>
+                <div class="text-center">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-success);">
+                        {{ priority_breakdown.low }}
+                    </div>
+                    <small class="text-secondary">Low</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h5 class="mb-4">
+                <i class="bi bi-award-fill" style="color: #ffd700;"></i>
+                Recent Achievements
+            </h5>
+            
+            {% if recent_achievements %}
+                {% for achievement in recent_achievements %}
+                <div class="achievement-item">
+                    <div class="achievement-icon">{{ achievement.get_badge_icon }}</div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">{{ achievement.get_achievement_type_display }}</h6>
+                        <small class="text-secondary">
+                            <i class="bi bi-clock"></i> {{ achievement.earned_date|timesince }} ago
+                        </small>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-secondary text-center py-4">
+                    <i class="bi bi-trophy" style="font-size: 3rem; opacity: 0.2;"></i><br>
+                    No achievements yet. Keep going!
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Chart.js configuration
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.borderColor = '#334155';
+    
+    // Completion Trend Chart
+    const completionCtx = document.getElementById('completionChart').getContext('2d');
+    new Chart(completionCtx, {
+        type: 'line',
+        data: {
+            labels: {{ dates_labels|safe }},
+            datasets: [{
+                label: 'Completions',
+                data: {{ daily_completions|safe }},
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#8b5cf6',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 },
+                    grid: { color: '#334155' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+    
+    // Category Pie Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ category_labels|safe }},
+            datasets: [{
+                data: {{ category_values|safe }},
+                backgroundColor: [
+                    '#8b5cf6',
+                    '#06b6d4',
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#ec4899'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 12 }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

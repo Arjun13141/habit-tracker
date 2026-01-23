@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from users import views as user_views
 from dashboard import views as dashboard_views
+from dashboard import analytics_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -14,6 +15,7 @@ urlpatterns = [
     
     # Dashboard
     path('', dashboard_views.dashboard, name='dashboard'),
+    path('analytics/', analytics_views.analytics, name='analytics'),
     
     # Habits URLs
     path('habits/', include('habits.urls')),
