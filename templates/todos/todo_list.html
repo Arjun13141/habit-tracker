@@ -1,235 +1,198 @@
 {% extends 'base.html' %}
 
-{% block title %}My Todos - Habit Tracker{% endblock %}
+{% block title %}My Tasks - HabitFlow{% endblock %}
+{% block page_title %}My Tasks{% endblock %}
+{% block page_subtitle %}Manage your daily tasks and to-dos{% endblock %}
 
 {% block extra_css %}
 <style>
-    .todo-completed {
-        opacity: 0.6;
-        text-decoration: line-through;
-    }
-    
-    .priority-high {
-        border-left: 4px solid #dc3545;
-    }
-    
-    .priority-medium {
-        border-left: 4px solid #ffc107;
-    }
-    
-    .priority-low {
-        border-left: 4px solid #28a745;
-    }
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-box {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.filter-tabs {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 6px;
+    display: inline-flex;
+    gap: 6px;
+    margin-bottom: 24px;
+}
+
+.filter-tab {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.filter-tab.active {
+    background: linear-gradient(135deg, var(--accent-primary), #7c3aed);
+    color: #fff;
+}
+
+.task-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent-warning);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.task-card.completed {
+    opacity: 0.65;
+    border-left-color: var(--accent-success);
+}
+
+.task-title.completed {
+    text-decoration: line-through;
+}
+
+.task-actions {
+    display: flex;
+    gap: 8px;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="text-white fw-bold">
-                <i class="bi bi-card-checklist"></i> My Todos
-            </h1>
-            <a href="{% url 'todo-create' %}" class="btn btn-light btn-lg">
-                <i class="bi bi-plus-circle"></i> New Todo
-            </a>
-        </div>
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">All Tasks</h2>
+    <a href="{% url 'todo-create' %}" class="btn btn-primary btn-lg">
+        <i class="bi bi-plus-circle"></i> New Task
+    </a>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+    <div class="stat-box">
+        <div class="stat-number text-warning">{{ total_todos }}</div>
+        <div class="stat-label">Total Tasks</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-number text-primary">{{ pending_todos }}</div>
+        <div class="stat-label">Pending</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-number text-success">{{ completed_todos }}</div>
+        <div class="stat-label">Completed</div>
     </div>
 </div>
 
-<!-- Filter Tabs -->
-<ul class="nav nav-pills mb-4" id="todoTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="pending-tab" data-bs-toggle="pill" data-bs-target="#pending" type="button">
-            <i class="bi bi-hourglass-split"></i> Pending
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="completed-tab" data-bs-toggle="pill" data-bs-target="#completed" type="button">
-            <i class="bi bi-check-circle"></i> Completed
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="all-tab" data-bs-toggle="pill" data-bs-target="#all" type="button">
-            <i class="bi bi-list"></i> All
-        </button>
-    </li>
-</ul>
+<!-- FILTER TABS -->
+<div class="filter-tabs">
+    <button class="filter-tab active" onclick="filterTasks('all')">All Tasks</button>
+    <button class="filter-tab" onclick="filterTasks('pending')">Pending</button>
+    <button class="filter-tab" onclick="filterTasks('completed')">Completed</button>
+</div>
 
-<div class="tab-content" id="todoTabContent">
-    <!-- Pending Todos -->
-    <div class="tab-pane fade show active" id="pending" role="tabpanel">
-        <div class="row">
-            {% for todo in todos %}
-                {% if not todo.completed %}
-                <div class="col-md-6 mb-3">
-                    <div class="card priority-{{ todo.priority }}">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <h5 class="card-title fw-bold">{{ todo.title }}</h5>
-                                    <p class="card-text text-muted">{{ todo.description|truncatewords:20|default:"No description" }}</p>
-                                    
-                                    <div class="mb-2">
-                                        <span class="badge bg-{{ todo.priority }}">
-                                            <i class="bi bi-flag-fill"></i> {{ todo.get_priority_display }} Priority
-                                        </span>
-                                        {% if todo.due_date %}
-                                        <span class="badge bg-info ms-2">
-                                            <i class="bi bi-calendar-event"></i> Due: {{ todo.due_date }}
-                                        </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="ms-3">
-                                    <form method="POST" action="{% url 'todo-toggle' todo.pk %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-success btn-sm mb-2" title="Mark as complete">
-                                            <i class="bi bi-check-circle"></i>
-                                        </button>
-                                    </form>
-                                    <a href="{% url 'todo-update' todo.pk %}" class="btn btn-primary btn-sm mb-2" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a href="{% url 'todo-delete' todo.pk %}" class="btn btn-danger btn-sm mb-2" title="Delete">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer text-muted small">
-                            Created {{ todo.created_at|timesince }} ago
-                        </div>
-                    </div>
-                </div>
+<!-- TASK LIST -->
+<div id="tasks-container">
+{% if todos %}
+    {% for todo in todos %}
+    <div class="task-card {% if todo.completed %}completed{% endif %}"
+         data-status="{% if todo.completed %}completed{% else %}pending{% endif %}">
+
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h5 class="task-title {% if todo.completed %}completed{% endif %}">
+                    {{ todo.title }}
+                </h5>
+
+                {% if todo.description %}
+                <p class="text-secondary small mb-1">
+                    {{ todo.description }}
+                </p>
                 {% endif %}
-            {% empty %}
-                <div class="col-12">
-                    <div class="card text-center py-5">
-                        <div class="card-body">
-                            <i class="bi bi-check-all" style="font-size: 5rem; color: #28a745;"></i>
-                            <h3 class="mt-4 mb-3">All Caught Up!</h3>
-                            <p class="text-muted mb-4">You have no pending todos. Great job!</p>
-                            <a href="{% url 'todo-create' %}" class="btn btn-primary btn-lg">
-                                <i class="bi bi-plus-circle"></i> Add New Todo
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-    
-    <!-- Completed Todos -->
-    <div class="tab-pane fade" id="completed" role="tabpanel">
-        <div class="row">
-            {% for todo in todos %}
-                {% if todo.completed %}
-                <div class="col-md-6 mb-3">
-                    <div class="card todo-completed">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <h5 class="card-title fw-bold">{{ todo.title }}</h5>
-                                    <p class="card-text text-muted">{{ todo.description|truncatewords:20|default:"No description" }}</p>
-                                    <small class="text-success">
-                                        <i class="bi bi-check-circle-fill"></i> Completed {{ todo.completed_at|timesince }} ago
-                                    </small>
-                                </div>
-                                <div class="ms-3">
-                                    <form method="POST" action="{% url 'todo-toggle' todo.pk %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm mb-2" title="Mark as incomplete">
-                                            <i class="bi bi-arrow-counterclockwise"></i>
-                                        </button>
-                                    </form>
-                                    <a href="{% url 'todo-delete' todo.pk %}" class="btn btn-outline-danger btn-sm mb-2" title="Delete">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            {% empty %}
-                <div class="col-12">
-                    <div class="card text-center py-5">
-                        <div class="card-body">
-                            <i class="bi bi-inbox" style="font-size: 5rem; color: #ccc;"></i>
-                            <h3 class="mt-4 mb-3">No Completed Todos</h3>
-                            <p class="text-muted">Complete some todos to see them here!</p>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-    
-    <!-- All Todos -->
-    <div class="tab-pane fade" id="all" role="tabpanel">
-        <div class="row">
-            {% for todo in todos %}
-            <div class="col-md-6 mb-3">
-                <div class="card priority-{{ todo.priority }} {% if todo.completed %}todo-completed{% endif %}">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h5 class="card-title fw-bold">{{ todo.title }}</h5>
-                                <p class="card-text text-muted">{{ todo.description|truncatewords:20|default:"No description" }}</p>
-                                
-                                <div class="mb-2">
-                                    {% if todo.completed %}
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle-fill"></i> Completed
-                                    </span>
-                                    {% else %}
-                                    <span class="badge bg-{{ todo.priority }}">
-                                        <i class="bi bi-flag-fill"></i> {{ todo.get_priority_display }}
-                                    </span>
-                                    {% endif %}
-                                    {% if todo.due_date %}
-                                    <span class="badge bg-info ms-2">
-                                        <i class="bi bi-calendar-event"></i> {{ todo.due_date }}
-                                    </span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="ms-3">
-                                <form method="POST" action="{% url 'todo-toggle' todo.pk %}" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-{% if todo.completed %}outline-secondary{% else %}success{% endif %} btn-sm mb-2">
-                                        <i class="bi bi-{% if todo.completed %}arrow-counterclockwise{% else %}check-circle{% endif %}"></i>
-                                    </button>
-                                </form>
-                                {% if not todo.completed %}
-                                <a href="{% url 'todo-update' todo.pk %}" class="btn btn-primary btn-sm mb-2">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                {% endif %}
-                                <a href="{% url 'todo-delete' todo.pk %}" class="btn btn-{% if todo.completed %}outline-{% endif %}danger btn-sm mb-2">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
-            {% empty %}
-                <div class="col-12">
-                    <div class="card text-center py-5">
-                        <div class="card-body">
-                            <i class="bi bi-inbox" style="font-size: 5rem; color: #ccc;"></i>
-                            <h3 class="mt-4 mb-3">No Todos Yet</h3>
-                            <p class="text-muted mb-4">Start organizing your tasks today!</p>
-                            <a href="{% url 'todo-create' %}" class="btn btn-primary btn-lg">
-                                <i class="bi bi-plus-circle"></i> Create Your First Todo
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+
+            <!-- ACTION BUTTONS -->
+            <div class="task-actions">
+
+                <!-- COMPLETE / REVERT -->
+                <form method="POST" action="{% url 'todo-toggle' todo.pk %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="btn btn-sm {% if todo.completed %}btn-warning{% else %}btn-success{% endif %}"
+                            title="{% if todo.completed %}Revert{% else %}Complete{% endif %}">
+                        {% if todo.completed %}
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        {% else %}
+                            <i class="bi bi-check-lg"></i>
+                        {% endif %}
+                    </button>
+                </form>
+
+                <!-- DELETE -->
+                <form method="POST" action="{% url 'todo-delete' todo.pk %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="btn btn-sm btn-danger"
+                            onclick="return confirm('Delete this task?')"
+                            title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+
+            </div>
         </div>
+
     </div>
+    {% endfor %}
+{% else %}
+    <div class="text-center p-5">
+        <h4>No Tasks Yet</h4>
+        <p class="text-secondary">Create your first task to get started</p>
+        <a href="{% url 'todo-create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Create Task
+        </a>
+    </div>
+{% endif %}
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterTasks(filter) {
+    document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+
+    document.querySelectorAll('.task-card').forEach(task => {
+        if (filter === 'all' || task.dataset.status === filter) {
+            task.style.display = 'block';
+        } else {
+            task.style.display = 'none';
+        }
+    });
+}
+</script>
 {% endblock %}

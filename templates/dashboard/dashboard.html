@@ -1,119 +1,179 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - Habit Tracker{% endblock %}
+{% block title %}Dashboard - HabitFlow{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Welcome back, {{ user.username }}! Here's your progress today{% endblock %}
 
 {% block extra_css %}
 <style>
-    .modern-stat-card {
-        background: white;
-        border-radius: 20px;
-        padding: 25px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-        border: none;
+    .metric-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
     }
     
-    .modern-stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
     }
     
-    .stat-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 15px;
+    .metric-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #7c3aed); }
+    .metric-card.cyan::before { background: linear-gradient(90deg, #06b6d4, #0891b2); }
+    .metric-card.green::before { background: linear-gradient(90deg, #10b981, #059669); }
+    .metric-card.orange::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+    
+    .metric-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
-        margin-bottom: 15px;
+        font-size: 1.5rem;
+        margin-bottom: 16px;
     }
     
-    .icon-orange { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); }
-    .icon-blue { background: linear-gradient(135deg, #4E73DF 0%, #224ECC 100%); }
-    .icon-green { background: linear-gradient(135deg, #1CC88A 0%, #17A673 100%); }
-    .icon-purple { background: linear-gradient(135deg, #6F42C1 0%, #5A32A3 100%); }
+    .metric-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+    .metric-icon.cyan { background: rgba(6, 182, 212, 0.1); color: #06b6d4; }
+    .metric-icon.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .metric-icon.orange { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
     
-    .stat-number {
+    .metric-value {
         font-size: 2.5rem;
         font-weight: 700;
-        color: #2C3E50;
-        margin: 0;
+        line-height: 1;
+        margin-bottom: 8px;
     }
     
-    .stat-label {
-        color: #7F8C8D;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+    .metric-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
     }
     
-
-    .habit-card-modern {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        border-left: 4px solid #667eea;
-        transition: all 0.3s ease;
-        margin-bottom: 15px;
-    }
-    
-    .habit-card-modern:hover {
-        transform: translateX(5px);
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    }
-    
-    .habit-completed-modern {
-        border-left-color: #1CC88A;
-        background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
-    }
-    
-    .streak-badge {
-        background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-        color: white;
-        padding: 8px 15px;
-        border-radius: 20px;
-        font-weight: 600;
-        display: inline-flex;
+    .progress-ring {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: conic-gradient(#8b5cf6 var(--progress, 0%), var(--bg-tertiary) 0%);
+        display: flex;
         align-items: center;
-        gap: 5px;
+        justify-content: center;
+        position: relative;
+        margin: 0 auto;
     }
     
-    .category-badge {
-        background: #E3F2FD;
-        color: #1976D2;
+    .progress-ring-inner {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background: var(--bg-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    
+    .progress-percentage {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    
+    .progress-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+    
+    .habit-item {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 12px;
+        transition: all 0.2s;
+    }
+    
+    .habit-item:hover {
+        border-color: var(--accent-primary);
+        transform: translateX(4px);
+    }
+    
+    .habit-item.completed {
+        border-left: 3px solid var(--accent-success);
+        background: rgba(16, 185, 129, 0.05);
+    }
+    
+    .badge-custom {
         padding: 6px 12px;
-        border-radius: 15px;
-        font-size: 0.85rem;
+        border-radius: 8px;
+        font-size: 0.75rem;
         font-weight: 600;
     }
     
-    .todo-card-modern {
-        background: white;
+    .badge-streak {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+    
+    .badge-category {
+        background: rgba(139, 92, 246, 0.1);
+        color: #8b5cf6;
+    }
+    
+    .achievement-badge {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
         border-radius: 12px;
-        padding: 15px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.2s;
+    }
+    
+    .achievement-badge:hover {
+        transform: scale(1.05);
+        border-color: var(--accent-primary);
+    }
+    
+    .achievement-icon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+    }
+    
+    .todo-item {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-left: 3px solid var(--accent-warning);
+        border-radius: 10px;
+        padding: 16px;
         margin-bottom: 10px;
-        border-left: 3px solid #FFC107;
-        transition: all 0.2s ease;
+        transition: all 0.2s;
     }
     
-    .todo-card-modern:hover {
-        box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+    .todo-item:hover {
+        border-color: var(--accent-primary);
     }
     
-    .priority-high { border-left-color: #FF6B6B; }
-    .priority-medium { border-left-color: #FFC107; }
-    .priority-low { border-left-color: #1CC88A; }
+    .todo-item.completed {
+        opacity: 0.6;
+        border-left-color: var(--accent-success);
+    }
     
     .action-btn {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: none;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: none;
-        transition: all 0.2s ease;
+        transition: all 0.2s;
         cursor: pointer;
     }
     
@@ -122,266 +182,277 @@
     }
     
     .section-header {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
     
-    @media (max-width: 768px) {
-        .stat-number { font-size: 2rem; }
-        .modern-stat-card { padding: 20px; }
-        .habit-card-modern { padding: 15px; }
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid" style="padding: 20px;">
-    <!-- Welcome Header -->
-    <div class="section-header">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h2 class="mb-0" style="color: #2C3E50; font-weight: 700;">
-                    Hello, {{ user.username }}! 👋
-                </h2>
-                <p class="text-muted mb-0">Track & manage your progress here</p>
+<!-- Metrics Row -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card purple">
+            <div class="metric-icon purple">
+                <i class="bi bi-list-check"></i>
             </div>
-            <div class="col-md-6 text-end">
-                <div class="btn-group">
-                    <a href="{% url 'habit-create' %}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> New Habit
-                    </a>
-                    <a href="{% url 'todo-create' %}" class="btn btn-warning text-dark">
-                        <i class="bi bi-plus-circle"></i> New Todo
-                    </a>
-                </div>
-            </div>
+            <div class="metric-value">{{ total_habits }}</div>
+            <div class="metric-label">Active Habits</div>
         </div>
     </div>
-
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="modern-stat-card">
-                <div class="stat-icon icon-orange text-white">
-                    <i class="bi bi-list-check"></i>
-                </div>
-                <h3 class="stat-number">{{ total_habits }}</h3>
-                <p class="stat-label mb-0">Active Habits</p>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card cyan">
+            <div class="metric-icon cyan">
+                <i class="bi bi-check-circle-fill"></i>
             </div>
-        </div>
-        
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="modern-stat-card">
-                <div class="stat-icon icon-blue text-white">
-                    <i class="bi bi-check-circle-fill"></i>
-                </div>
-                <h3 class="stat-number">{{ habits_completed_today }}</h3>
-                <p class="stat-label mb-0">Completed Today</p>
-            </div>
-        </div>
-        
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="modern-stat-card">
-                <div class="stat-icon icon-green text-white">
-                    <i class="bi bi-card-checklist"></i>
-                </div>
-                <h3 class="stat-number">{{ todos_pending_count }}</h3>
-                <p class="stat-label mb-0">Pending Tasks</p>
-            </div>
-        </div>
-        
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="modern-stat-card">
-                <div class="stat-icon icon-purple text-white">
-                    <i class="bi bi-trophy-fill"></i>
-                </div>
-                <h3 class="stat-number">{{ todos_completed_count }}</h3>
-                <p class="stat-label mb-0">Tasks Done</p>
-            </div>
+            <div class="metric-value">{{ habits_completed_today }}</div>
+            <div class="metric-label">Completed Today</div>
         </div>
     </div>
-
-    <!-- Progress Rings -->
-    <div class="row mb-4">
-        <div class="col-md-6 mb-3">
-            <div class="modern-stat-card text-center">
-                <h5 class="mb-4">Today's Habit Progress</h5>
-                <div class="position-relative d-inline-block">
-                    <div class="progress mx-auto" style="width: 150px; height: 150px; border-radius: 50%; background: #f0f0f0;">
-                        <div class="progress-bar" role="progressbar" 
-                             style="width: {{ habit_completion_percentage }}%; 
-                                    background: conic-gradient(#FF6B6B {{ habit_completion_percentage }}%, #f0f0f0 0);
-                                    border-radius: 50%;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;">
-                        </div>
-                    </div>
-                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: 700;">
-                        {{ habit_completion_percentage|floatformat:0 }}%
-                    </div>
-                </div>
-                <p class="text-muted mt-3">{{ habits_completed_today }} of {{ total_habits }} habits completed</p>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card green">
+            <div class="metric-icon green">
+                <i class="bi bi-trophy-fill"></i>
             </div>
-        </div>
-        
-        <div class="col-md-6 mb-3">
-            <div class="modern-stat-card text-center">
-                <h5 class="mb-4">Overall Todo Completion</h5>
-                <div class="position-relative d-inline-block">
-                    <div class="progress mx-auto" style="width: 150px; height: 150px; border-radius: 50%; background: #f0f0f0;">
-                        <div class="progress-bar" role="progressbar" 
-                             style="width: {{ todo_completion_percentage }}%; 
-                                    background: conic-gradient(#FFC107 {{ todo_completion_percentage }}%, #f0f0f0 0);
-                                    border-radius: 50%;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;">
-                        </div>
-                    </div>
-                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: 700;">
-                        {{ todo_completion_percentage|floatformat:0 }}%
-                    </div>
-                </div>
-                <p class="text-muted mt-3">{{ todos_completed_count }} tasks completed</p>
-            </div>
+            <div class="metric-value">{{ total_achievements }}</div>
+            <div class="metric-label">Achievements</div>
         </div>
     </div>
-
-    <!-- Habits Section -->
-    <div class="section-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h4 class="mb-0" style="color: #2C3E50; font-weight: 700;">
-                <i class="bi bi-bookmark-check-fill" style="color: #667eea;"></i> Today's Habits
-            </h4>
-            <a href="{% url 'habit-list' %}" class="btn btn-outline-primary btn-sm">View All</a>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card orange">
+            <div class="metric-icon orange">
+                <i class="bi bi-star-fill"></i>
+            </div>
+            <div class="metric-value">{{ user_points }}</div>
+            <div class="metric-label">Total Points</div>
         </div>
     </div>
+</div>
 
-    <div class="row mb-4">
-        {% if habits %}
-            {% for habit in habits %}
-            <div class="col-lg-6 mb-3">
-                <div class="habit-card-modern {% if habit.is_completed_today %}habit-completed-modern{% endif %}">
+<!-- Progress & Achievements -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card-modern">
+            <h6 class="mb-4 text-center">Today's Progress</h6>
+            <div class="progress-ring" style="--progress: {{ habit_completion_percentage }}%;">
+                <div class="progress-ring-inner">
+                    <div class="progress-percentage">{{ habit_completion_percentage|floatformat:0 }}%</div>
+                    <div class="progress-label">Complete</div>
+                </div>
+            </div>
+            <p class="text-center text-secondary mt-3 mb-0">
+                {{ habits_completed_today }} of {{ total_habits }} habits done
+            </p>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card-modern">
+            <div class="section-header">
+                <h6 class="mb-0"><i class="bi bi-trophy-fill text-warning"></i> Recent Achievements</h6>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            
+            {% if achievements %}
+            <div class="row g-3">
+                {% for achievement in achievements|slice:":3" %}
+                <div class="col-md-4">
+                    <div class="achievement-badge">
+                        <div class="achievement-icon">{{ achievement.get_badge_icon }}</div>
+                        <div class="fw-semibold mb-1">{{ achievement.get_achievement_type_display }}</div>
+                        <small class="text-secondary">{{ achievement.earned_date|timesince }} ago</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-award" style="font-size: 3rem; opacity: 0.3;"></i>
+                <p class="text-secondary mt-2 mb-0">No achievements yet. Keep going!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Habits & Tasks Side by Side -->
+<div class="row g-3">
+    <!-- Left Column - Uncompleted Habits -->
+    <div class="col-lg-6">
+        <div class="card-modern" style="min-height: 500px;">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="bi bi-bookmark-check-fill" style="color: #8b5cf6;"></i>
+                    Today's Habits
+                    <span class="badge bg-secondary ms-2">{{ uncompleted_habits_count }} pending</span>
+                </div>
+                <a href="{% url 'habit-create' %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i>
+                </a>
+            </div>
+            
+            {% if habits %}
+            <div style="max-height: 600px; overflow-y: auto;">
+                {% for habit in habits %}
+                <div class="habit-item">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <h5 class="mb-2" style="font-weight: 600;">{{ habit.name }}</h5>
-                            <p class="text-muted small mb-3">{{ habit.description|truncatewords:12 }}</p>
+                            <h6 class="mb-2">{{ habit.name }}</h6>
+                            {% if habit.description %}
+                            <p class="text-secondary small mb-3">{{ habit.description|truncatewords:12 }}</p>
+                            {% endif %}
                             <div class="d-flex gap-2 flex-wrap">
-                                <span class="category-badge">{{ habit.get_category_display }}</span>
-                                <span class="streak-badge">
-                                    <i class="bi bi-fire"></i> {{ habit.get_current_streak }} day streak
+                                <span class="badge-custom badge-category">{{ habit.get_category_display }}</span>
+                                <span class="badge-custom badge-streak">
+                                    <i class="bi bi-fire"></i> {{ habit.get_current_streak }} day{% if habit.get_current_streak != 1 %}s{% endif %}
                                 </span>
                             </div>
                         </div>
-                        <div class="d-flex flex-column gap-2 ms-3">
+                        <div class="d-flex gap-2 ms-3">
                             <form method="POST" action="{% url 'habit-complete' habit.pk %}">
                                 {% csrf_token %}
-                                <button type="submit" class="action-btn {% if habit.is_completed_today %}btn-success{% else %}btn-outline-success{% endif %}">
+                                <button type="submit" class="action-btn btn-outline-success" title="Mark as complete">
                                     <i class="bi bi-check-lg"></i>
                                 </button>
                             </form>
-                            <a href="{% url 'habit-update' habit.pk %}" class="action-btn btn-outline-primary">
+                            <a href="{% url 'habit-update' habit.pk %}" class="action-btn btn-outline-primary" title="Edit">
                                 <i class="bi bi-pencil"></i>
                             </a>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        {% else %}
-            <div class="col-12">
-                <div class="modern-stat-card text-center py-5">
-                    <i class="bi bi-inbox" style="font-size: 4rem; color: #E0E0E0;"></i>
-                    <h4 class="mt-3 mb-3">No Habits Yet</h4>
-                    <p class="text-muted mb-4">Start building better habits today!</p>
-                    <a href="{% url 'habit-create' %}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-plus-circle"></i> Create Your First Habit
-                    </a>
-                </div>
+            
+            <div class="mt-3 text-center">
+                <a href="{% url 'habit-list' %}" class="btn btn-outline-primary btn-sm">
+                    View All Habits
+                </a>
             </div>
-        {% endif %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-check-all" style="font-size: 4rem; color: #10b981; opacity: 0.5;"></i>
+                <h5 class="mt-3 mb-2">All Done! 🎉</h5>
+                <p class="text-secondary mb-3">You've completed all your habits for today!</p>
+                <a href="{% url 'habit-list' %}" class="btn btn-outline-primary btn-sm">
+                    View All Habits
+                </a>
+            </div>
+            {% endif %}
+        </div>
     </div>
-
-    <!-- Todos Section -->
-    <div class="row">
-        <div class="col-md-6 mb-4">
+    
+    <!-- Right Column - Uncompleted Tasks -->
+    <div class="col-lg-6">
+        <div class="card-modern" style="min-height: 500px;">
             <div class="section-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0" style="font-weight: 700;">
-                        <i class="bi bi-hourglass-split" style="color: #FFC107;"></i> Pending Tasks
-                    </h5>
-                    <a href="{% url 'todo-list' %}" class="btn btn-outline-warning btn-sm">View All</a>
+                <div class="section-title">
+                    <i class="bi bi-hourglass-split" style="color: #f59e0b;"></i>
+                    Pending Tasks
+                    <span class="badge bg-secondary ms-2">{{ todos_pending_count }}</span>
                 </div>
+                <a href="{% url 'todo-create' %}" class="btn btn-sm btn-warning text-dark">
+                    <i class="bi bi-plus"></i>
+                </a>
             </div>
             
             {% if todos_pending %}
+            <div style="max-height: 600px; overflow-y: auto;">
                 {% for todo in todos_pending %}
-                <div class="todo-card-modern priority-{{ todo.priority }}">
+                <div class="todo-item priority-{{ todo.priority }}">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="mb-1" style="font-weight: 600;">{{ todo.title }}</h6>
-                            <div class="d-flex gap-2 align-items-center">
-                                <span class="badge bg-{{ todo.priority }} text-white">{{ todo.get_priority_display }}</span>
+                            <h6 class="mb-1">{{ todo.title }}</h6>
+                            <div class="d-flex gap-2 align-items-center flex-wrap">
+                                <span class="badge bg-{{ todo.priority }}">{{ todo.get_priority_display }}</span>
                                 {% if todo.due_date %}
-                                <small class="text-muted">
+                                <small class="text-secondary">
                                     <i class="bi bi-calendar"></i> {{ todo.due_date }}
                                 </small>
                                 {% endif %}
                             </div>
                         </div>
-                        <form method="POST" action="{% url 'todo-toggle' todo.pk %}">
-                            {% csrf_token %}
-                            <button type="submit" class="action-btn btn-outline-success">
-                                <i class="bi bi-check"></i>
-                            </button>
-                        </form>
+                        <div class="d-flex gap-2 ms-2">
+                            <form method="POST" action="{% url 'todo-toggle' todo.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="action-btn btn-outline-success" title="Mark as complete">
+                                    <i class="bi bi-check"></i>
+                                </button>
+                            </form>
+                            <a href="{% url 'todo-update' todo.pk %}" class="action-btn btn-outline-primary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
-            {% else %}
-                <div class="modern-stat-card text-center py-4">
-                    <i class="bi bi-check-all" style="font-size: 3rem; color: #1CC88A;"></i>
-                    <p class="text-muted mt-2 mb-0">All caught up! 🎉</p>
-                </div>
-            {% endif %}
-        </div>
-        
-        <div class="col-md-6 mb-4">
-            <div class="section-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0" style="font-weight: 700;">
-                        <i class="bi bi-check-circle-fill text-success"></i> Recently Completed
-                    </h5>
-                </div>
             </div>
             
-            {% if todos_completed %}
-                {% for todo in todos_completed %}
-                <div class="todo-card-modern" style="opacity: 0.7;">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1" style="text-decoration: line-through;">{{ todo.title }}</h6>
-                            <small class="text-success">
-                                <i class="bi bi-check-circle-fill"></i> {{ todo.completed_at|timesince }} ago
-                            </small>
-                        </div>
-                        <a href="{% url 'todo-delete' todo.pk %}" class="action-btn btn-outline-danger">
-                            <i class="bi bi-trash"></i>
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="mt-3 text-center">
+                <a href="{% url 'todo-list' %}" class="btn btn-outline-warning btn-sm text-dark">
+                    View All Tasks
+                </a>
+            </div>
             {% else %}
-                <div class="modern-stat-card text-center py-4">
-                    <i class="bi bi-inbox" style="font-size: 3rem; color: #E0E0E0;"></i>
-                    <p class="text-muted mt-2 mb-0">No completed tasks yet</p>
-                </div>
+            <div class="text-center py-5">
+                <i class="bi bi-check-circle" style="font-size: 4rem; color: #10b981; opacity: 0.5;"></i>
+                <h5 class="mt-3 mb-2">All Caught Up! 🎉</h5>
+                <p class="text-secondary mb-3">No pending tasks. Great job!</p>
+                <a href="{% url 'todo-create' %}" class="btn btn-warning text-dark">
+                    <i class="bi bi-plus-circle"></i> Add New Task
+                </a>
+            </div>
             {% endif %}
         </div>
     </div>
 </div>
+
+<!-- Recently Completed (Optional Bottom Section) -->
+{% if todos_completed %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card-modern">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    Recently Completed
+                </div>
+            </div>
+            
+            <div class="row">
+                {% for todo in todos_completed %}
+                <div class="col-md-6 col-lg-4 mb-2">
+                    <div class="todo-item completed">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1" style="text-decoration: line-through; opacity: 0.7;">{{ todo.title }}</h6>
+                                <small class="text-success">
+                                    <i class="bi bi-check-circle-fill"></i> {{ todo.completed_at|timesince }} ago
+                                </small>
+                            </div>
+                            <a href="{% url 'todo-delete' todo.pk %}" class="action-btn btn-outline-danger btn-sm">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

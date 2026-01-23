@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import Habit, HabitCompletion
 from .forms import HabitForm
+from .achievement_service import check_and_award_achievements
 
 @login_required
 def habit_list(request):
@@ -69,8 +70,18 @@ def habit_complete(request, pk):
         completion.completed = not completion.completed
         completion.save()
     
+    # Check for new achievements
+    new_achievements = check_and_award_achievements(request.user)
+    
     if completion.completed:
         messages.success(request, f'Great job! {habit.name} completed for today! 🎉')
+        
+        # Notify about new achievements
+        for achievement in new_achievements:
+            messages.success(
+                request, 
+                f'🏆 Achievement Unlocked: {achievement.get_achievement_type_display()}!'
+            )
     else:
         messages.info(request, f'{habit.name} marked as incomplete.')
     

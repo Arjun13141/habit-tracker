@@ -1,90 +1,200 @@
 {% extends 'base.html' %}
 
-{% block title %}My Habits - Habit Tracker{% endblock %}
+{% block title %}My Habits - HabitFlow{% endblock %}
+{% block page_title %}My Habits{% endblock %}
+{% block page_subtitle %}Manage and track all your habits{% endblock %}
+
+{% block extra_css %}
+<style>
+    .habit-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.3s;
+        height: 100%;
+    }
+    
+    .habit-card:hover {
+        border-color: var(--accent-primary);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(139, 92, 246, 0.2);
+    }
+    
+    .habit-card.completed {
+        border-left: 4px solid var(--accent-success);
+    }
+    
+    .habit-header {
+        display: flex;
+        justify-content: between;
+        align-items: start;
+        margin-bottom: 16px;
+    }
+    
+    .habit-stats {
+        display: flex;
+        gap: 12px;
+        margin: 16px 0;
+        flex-wrap: wrap;
+    }
+    
+    .stat-pill {
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .stat-pill.category {
+        background: rgba(139, 92, 246, 0.1);
+        color: #8b5cf6;
+    }
+    
+    .stat-pill.streak {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+    
+    .stat-pill.completions {
+        background: rgba(6, 182, 212, 0.1);
+        color: #06b6d4;
+    }
+    
+    .complete-btn {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        transition: all 0.2s;
+        margin-bottom: 10px;
+    }
+    
+    .complete-btn.completed {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+    
+    .complete-btn.pending {
+        background: var(--bg-tertiary);
+        border: 2px dashed var(--border-color);
+        color: var(--text-secondary);
+    }
+    
+    .complete-btn:hover {
+        transform: scale(1.02);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .action-buttons .btn {
+        flex: 1;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+    }
+    
+    .empty-icon {
+        font-size: 5rem;
+        opacity: 0.2;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="text-white fw-bold">
-                <i class="bi bi-list-check"></i> My Habits
-            </h1>
-            <a href="{% url 'habit-create' %}" class="btn btn-light btn-lg">
-                <i class="bi bi-plus-circle"></i> New Habit
-            </a>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">All Habits</h2>
+        <p class="text-secondary mb-0">{{ habits.count }} active habits</p>
     </div>
+    <a href="{% url 'habit-create' %}" class="btn btn-primary btn-lg">
+        <i class="bi bi-plus-circle"></i> New Habit
+    </a>
 </div>
 
-<div class="row">
-    {% if habits %}
-        {% for habit in habits %}
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100 {% if habit.is_completed_today %}border-success{% endif %}">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <h5 class="card-title fw-bold">{{ habit.name }}</h5>
-                        {% if habit.is_completed_today %}
-                        <span class="badge bg-success">
-                            <i class="bi bi-check-circle-fill"></i> Done
-                        </span>
-                        {% endif %}
-                    </div>
-                    
-                    <p class="card-text text-muted">{{ habit.description|default:"No description" }}</p>
-                    
-                    <div class="mb-3">
-                        <span class="badge bg-secondary me-2">
-                            <i class="bi bi-tag"></i> {{ habit.get_category_display }}
-                        </span>
-                        <span class="badge bg-warning text-dark">
-                            <i class="bi bi-fire"></i> {{ habit.get_current_streak }} day streak
-                        </span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <small class="text-muted">
-                            <i class="bi bi-graph-up"></i> Total completions: {{ habit.get_total_completions }}
-                        </small>
-                    </div>
-                    
-                    <div class="d-grid gap-2">
-                        <form method="POST" action="{% url 'habit-complete' habit.pk %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn {% if habit.is_completed_today %}btn-success{% else %}btn-outline-success{% endif %} w-100">
-                                <i class="bi bi-check-circle"></i> 
-                                {% if habit.is_completed_today %}Completed Today{% else %}Mark Complete{% endif %}
-                            </button>
-                        </form>
-                        <div class="btn-group" role="group">
-                            <a href="{% url 'habit-update' habit.pk %}" class="btn btn-outline-primary">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <a href="{% url 'habit-delete' habit.pk %}" class="btn btn-outline-danger">
-                                <i class="bi bi-trash"></i> Delete
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer text-muted small">
-                    Created {{ habit.created_at|timesince }} ago
-                </div>
+{% if habits %}
+<div class="row g-4">
+    {% for habit in habits %}
+    <div class="col-lg-4 col-md-6">
+        <div class="habit-card {% if habit.is_completed_today %}completed{% endif %}">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h5 class="mb-0">{{ habit.name }}</h5>
+                {% if habit.is_completed_today %}
+                <span class="badge bg-success">
+                    <i class="bi bi-check-circle-fill"></i> Done
+                </span>
+                {% endif %}
             </div>
-        </div>
-        {% endfor %}
-    {% else %}
-        <div class="col-12">
-            <div class="card text-center py-5">
-                <div class="card-body">
-                    <i class="bi bi-inbox" style="font-size: 5rem; color: #ccc;"></i>
-                    <h3 class="mt-4 mb-3">No Habits Yet</h3>
-                    <p class="text-muted mb-4">Start building better habits today!</p>
-                    <a href="{% url 'habit-create' %}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-plus-circle"></i> Create Your First Habit
+            
+            <p class="text-secondary mb-3">
+                {{ habit.description|default:"No description provided"|truncatewords:15 }}
+            </p>
+            
+            <div class="habit-stats">
+                <span class="stat-pill category">
+                    <i class="bi bi-tag"></i>
+                    {{ habit.get_category_display }}
+                </span>
+                <span class="stat-pill streak">
+                    <i class="bi bi-fire"></i>
+                    {{ habit.get_current_streak }} days
+                </span>
+                <span class="stat-pill completions">
+                    <i class="bi bi-graph-up"></i>
+                    {{ habit.get_total_completions }} total
+                </span>
+            </div>
+            
+            <div class="mt-4">
+                <form method="POST" action="{% url 'habit-complete' habit.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="complete-btn {% if habit.is_completed_today %}completed{% else %}pending{% endif %}">
+                        <i class="bi bi-check-circle"></i>
+                        {% if habit.is_completed_today %}
+                            Completed Today
+                        {% else %}
+                            Mark as Complete
+                        {% endif %}
+                    </button>
+                </form>
+                
+                <div class="action-buttons">
+                    <a href="{% url 'habit-update' habit.pk %}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <a href="{% url 'habit-delete' habit.pk %}" class="btn btn-outline-danger">
+                        <i class="bi bi-trash"></i> Delete
                     </a>
                 </div>
             </div>
+            
+            <div class="text-secondary small mt-3">
+                <i class="bi bi-clock"></i> Created {{ habit.created_at|timesince }} ago
+            </div>
         </div>
-    {% endif %}
+    </div>
+    {% endfor %}
 </div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">
+        <i class="bi bi-inbox"></i>
+    </div>
+    <h3 class="mb-3">No Habits Yet</h3>
+    <p class="text-secondary mb-4">Start building better habits today and track your progress!</p>
+    <a href="{% url 'habit-create' %}" class="btn btn-primary btn-lg">
+        <i class="bi bi-plus-circle"></i> Create Your First Habit
+    </a>
+</div>
+{% endif %}
 {% endblock %}

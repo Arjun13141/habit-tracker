@@ -1,88 +1,186 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ title }} - Habit Tracker{% endblock %}
+{% block title %}{{ title }} - HabitFlow{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Add a new task to your list{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    
+    .form-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 32px;
+    }
+    
+    .form-group {
+        margin-bottom: 24px;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+    }
+    
+    .form-label i {
+        color: var(--accent-warning);
+        margin-right: 8px;
+    }
+    
+    .form-control, .form-select {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: var(--text-primary);
+        width: 100%;
+        transition: all 0.2s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--accent-warning);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+    
+    .form-text {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-top: 6px;
+    }
+    
+    .priority-info {
+        background: rgba(245, 158, 11, 0.05);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 24px;
+    }
+    
+    .priority-info h6 {
+        color: var(--accent-warning);
+        margin-bottom: 12px;
+    }
+    
+    .priority-item {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .priority-item:last-child {
+        border-bottom: none;
+    }
+    
+    .button-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+    }
+    
+    .button-group .btn {
+        flex: 1;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        border: none;
+        color: white;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="card shadow-lg">
-            <div class="card-header bg-warning text-dark">
-                <h3 class="mb-0">
-                    <i class="bi bi-plus-circle"></i> {{ title }}
-                </h3>
+<div class="form-container">
+    <div class="form-card">
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="bi bi-bookmark"></i>
+                    Task Title *
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+                {% endif %}
+                <div class="form-text">What do you need to do?</div>
             </div>
-            <div class="card-body p-4">
-                <form method="POST">
-                    {% csrf_token %}
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">
-                            <i class="bi bi-bookmark"></i> Todo Title *
-                        </label>
-                        {{ form.title }}
-                        {% if form.title.errors %}
-                            <div class="text-danger small mt-1">{{ form.title.errors }}</div>
-                        {% endif %}
-                        <div class="form-text">What do you need to do?</div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">
-                            <i class="bi bi-text-paragraph"></i> Description
-                        </label>
-                        {{ form.description }}
-                        {% if form.description.errors %}
-                            <div class="text-danger small mt-1">{{ form.description.errors }}</div>
-                        {% endif %}
-                        <div class="form-text">Optional: Add more details about this task</div>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                <i class="bi bi-flag-fill"></i> Priority *
-                            </label>
-                            {{ form.priority }}
-                            {% if form.priority.errors %}
-                                <div class="text-danger small mt-1">{{ form.priority.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                <i class="bi bi-calendar-event"></i> Due Date
-                            </label>
-                            {{ form.due_date }}
-                            {% if form.due_date.errors %}
-                                <div class="text-danger small mt-1">{{ form.due_date.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-warning btn-lg text-dark fw-semibold">
-                            <i class="bi bi-check-circle"></i> Save Todo
-                        </button>
-                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-x-circle"></i> Cancel
-                        </a>
-                    </div>
-                </form>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="bi bi-text-paragraph"></i>
+                    Description
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                {% endif %}
+                <div class="form-text">Add more details about this task (optional)</div>
             </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-flag-fill"></i>
+                            Priority *
+                        </label>
+                        {{ form.priority }}
+                        {% if form.priority.errors %}
+                            <div class="text-danger small mt-1">{{ form.priority.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-calendar-event"></i>
+                            Due Date
+                        </label>
+                        {{ form.due_date }}
+                        {% if form.due_date.errors %}
+                            <div class="text-danger small mt-1">{{ form.due_date.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit" class="btn btn-warning btn-lg">
+                    <i class="bi bi-check-circle"></i> Save Task
+                </button>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="priority-info">
+        <h6>
+            <i class="bi bi-info-circle-fill"></i>
+            Priority Guide
+        </h6>
+        <div class="priority-item">
+            <strong style="color: var(--accent-danger);">High:</strong>
+            <span class="text-secondary"> Urgent and important tasks that need immediate attention</span>
         </div>
-        
-        <!-- Priority Guide -->
-        <div class="card mt-4 border-info">
-            <div class="card-body">
-                <h5 class="card-title text-info">
-                    <i class="bi bi-info-circle"></i> Priority Guide
-                </h5>
-                <ul class="mb-0">
-                    <li><strong class="text-danger">High:</strong> Urgent and important tasks</li>
-                    <li><strong class="text-warning">Medium:</strong> Important but not urgent</li>
-                    <li><strong class="text-success">Low:</strong> Nice to have tasks</li>
-                </ul>
-            </div>
+        <div class="priority-item">
+            <strong style="color: var(--accent-warning);">Medium:</strong>
+            <span class="text-secondary"> Important tasks but not urgent, plan ahead</span>
+        </div>
+        <div class="priority-item">
+            <strong style="color: var(--accent-success);">Low:</strong>
+            <span class="text-secondary"> Nice to have tasks, do when you have free time</span>
         </div>
     </div>
 </div>

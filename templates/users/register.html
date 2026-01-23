@@ -1,74 +1,146 @@
 {% extends 'base.html' %}
 
-{% block title %}Register - Habit Tracker{% endblock %}
+{% block title %}Register - HabitFlow{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+    
+    .sidebar { display: none; }
+    .main-content { margin-left: 0; padding: 20px; width: 100%; }
+    
+    .auth-container {
+        max-width: 450px;
+        margin: 0 auto;
+    }
+    
+    .auth-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .auth-logo {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+    
+    .auth-logo h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+    }
+    
+    .auth-logo p {
+        color: var(--text-secondary);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    
+    .form-control {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 14px 16px;
+        color: var(--text-primary);
+        width: 100%;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+    
+    .auth-footer {
+        text-align: center;
+        margin-top: 24px;
+        color: var(--text-secondary);
+    }
+    
+    .auth-footer a {
+        color: var(--accent-primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .form-text {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow-lg">
-            <div class="card-body p-5">
-                <div class="text-center mb-4">
-                    <i class="bi bi-person-plus-fill" style="font-size: 3rem; color: #667eea;"></i>
-                    <h2 class="mt-3 fw-bold">Create Account</h2>
-                    <p class="text-muted">Start your productivity journey today!</p>
-                </div>
-                
-                <form method="POST">
-                    {% csrf_token %}
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">
-                            <i class="bi bi-person"></i> Username
-                        </label>
-                        {{ form.username }}
-                        {% if form.username.errors %}
-                            <div class="text-danger small mt-1">{{ form.username.errors }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">
-                            <i class="bi bi-envelope"></i> Email
-                        </label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <div class="text-danger small mt-1">{{ form.email.errors }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">
-                            <i class="bi bi-lock"></i> Password
-                        </label>
-                        {{ form.password1 }}
-                        {% if form.password1.errors %}
-                            <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
-                        {% endif %}
-                        <div class="form-text">Password must be at least 8 characters.</div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">
-                            <i class="bi bi-lock-fill"></i> Confirm Password
-                        </label>
-                        {{ form.password2 }}
-                        {% if form.password2.errors %}
-                            <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
-                        <i class="bi bi-check-circle"></i> Create Account
-                    </button>
-                </form>
-                
-                <div class="text-center mt-4">
-                    <p class="text-muted">
-                        Already have an account? 
-                        <a href="{% url 'login' %}" class="text-decoration-none fw-semibold">Login here</a>
-                    </p>
-                </div>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <h1><i class="bi bi-check2-circle"></i> HabitFlow</h1>
+            <p>Create your account and start tracking!</p>
+        </div>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+                {% endif %}
             </div>
+            
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                    <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
+                {% endif %}
+                <div class="form-text">At least 8 characters</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 btn-lg mt-3">
+                <i class="bi bi-person-plus"></i> Create Account
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            Already have an account? <a href="{% url 'login' %}">Login here</a>
         </div>
     </div>
 </div>

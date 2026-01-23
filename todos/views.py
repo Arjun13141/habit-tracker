@@ -5,9 +5,26 @@ from .models import Todo
 from .forms import TodoForm
 
 @login_required
+# def todo_list(request):
+#     todos = Todo.objects.filter(user=request.user)
+#     return render(request, 'todos/todo_list.html', {'todos': todos})
 def todo_list(request):
     todos = Todo.objects.filter(user=request.user)
-    return render(request, 'todos/todo_list.html', {'todos': todos})
+
+    total_todos = todos.count()
+    completed_todos = todos.filter(completed=True).count()
+    pending_todos = total_todos - completed_todos
+
+    return render(
+        request,
+        'todos/todo_list.html',
+        {
+            'todos': todos,
+            'total_todos': total_todos,
+            'completed_todos': completed_todos,
+            'pending_todos': pending_todos,
+        }
+    )
 
 @login_required
 def todo_create(request):
