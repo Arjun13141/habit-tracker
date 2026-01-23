@@ -31,7 +31,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'web-production-99934.up.railway.app',  # Your Railway domain
-    '.railway.app',  # Allow all Railway subdomains
+    '.up.railway.app',  # Allow all Railway subdomains
 ]
 
 # CSRF Configuration
